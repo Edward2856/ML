@@ -1,0 +1,76 @@
+clc;clear;close all;
+function y = Sigmoid(x)
+    y = 1./(1+exp(-x));
+end
+function y = Derivative(x)
+    y = Sigmoid(x).*(1-Sigmoid(x));
+end
+% display(Sigmoid([0 1 2 3]))
+
+x = [2.5,0.5];
+y = [0.9,0.2];
+weights = -5:0.01:5;
+biases = -5:0.01:5;
+L = zeros(1001,1001);
+
+for w = weights
+    for b = biases
+        y_pred = Sigmoid(w*x+b);
+        L(round(w*100+501),round(b*100+501)) = sum((y - y_pred).^2)/2;
+    end
+end
+
+surf(weights,biases,L')
+shading interp
+colormap turbo
+colorbar
+xlabel('Weights');
+ylabel('Biases');
+zlabel('Loss');
+title('Loss Surface');
+grid on;
+hold on;
+
+L_min = min(L(:));
+% Find the indices of the minimum loss
+[minRow, minCol] = find(L == L_min);
+optimalWeight = weights(minRow);
+optimalBias = biases(minCol);
+% disp([optimalWeight, optimalBias, L_min])
+
+% Display the optimal parameters and minimum loss
+fprintf('By trying all combinations,\nOptimal Weight: %.2f\nOptimal Bias: %.2f\nMinimum Loss: %.12f\n', optimalWeight, optimalBias, L_min);
+
+Gradient Descent
+
+learningRate = 1; % Set the learning rate
+numIterations = 1000; % Number of iterations for gradient descent
+
+w = -2;
+b = 2;
+for iter = 1:numIterations
+    y_pred = Sigmoid(w * x + b);
+    error = y - y_pred;
+    scatter3(w,b,L(round(w*100+501),round(b*100+501)),'black','.')
+    w = w + learningRate * sum(error .* Derivative(w * x + b) .* x);
+    b = b + learningRate * sum(error .* Derivative(w * x + b));
+end
+% Calculate the final loss after gradient descent
+finalLoss = sum((y - Sigmoid(w * x + b)).^2) / 2;
+% Display the final weight and bias after gradient descent
+fprintf('\nAfter Gradient Descent,\nOptimal Weight: %.8f\nOptimal Bias: %.8f\nMinimum Loss: %.12f\n', w, b,finalLoss);
+hold off
+
+figure
+n = -5:0.01:5;
+% Calculate the sigmoid values for the range of n
+sigmoidValues = Sigmoid(w * n + b);
+% Plot the sigmoid function
+plot(n, sigmoidValues, 'LineWidth', 2);
+xlabel('Input');
+ylabel('Sigmoid Output');
+title('Sigmoid Function');
+grid on;
+
+hold on
+scatter(x,y,'red','filled')
