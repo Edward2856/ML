@@ -1,0 +1,89 @@
+import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+def derivative_sigmoid(z):
+    return sigmoid(z) * (1 - sigmoid(z))
+
+def softmax(z):
+    exp_z = np.exp(z)
+    return exp_z / np.sum(exp_z)
+
+# print(softmax(np.array([1, 2, 3])))
+
+d, n, k = 2, 2, 2
+layer_sizes = [d, n, k]
+L = len(layer_sizes) - 1
+weights = [np.random.rand(layer_sizes[i], layer_sizes[i+1]) for i in range(L)]
+biases = [np.random.rand(layer_sizes[i+1],1) for i in range(L)]
+
+def feedforward(W, x, b):
+    h = [x]
+    a = []
+    for i in range(L):
+        a.append(W[i].T @ h[-1] + b[i])
+        if i == L - 1:
+            h.append(softmax(a[-1]))
+        else:
+            h.append(sigmoid(a[-1]))
+    return h, a
+
+def backpropagation(W, h, a, y):
+    grad_a = [h[-1] - y]
+    grad_W = [h[-2] @ grad_a[-1].T]
+    grad_b = [grad_a[-1]]
+    for i in range(L-2, -1, -1):
+        grad_a.append((W[i+1] @ grad_a[-1]) * derivative_sigmoid(a[i]))
+        grad_W.append(h[i] @ grad_a[-1].T)
+        grad_b.append(grad_a[-1])
+    grad_W.reverse()
+    grad_b.reverse()
+    return grad_W, grad_b
+
+# #AND gate training data
+# X = [
+#     np.array([[0],[0]]),
+#     np.array([[0],[1]]),
+#     np.array([[1],[0]]),
+#     np.array([[1],[1]])
+# ]
+
+# Y = [
+#     np.array([[1],[0]]),
+#     np.array([[1],[0]]),
+#     np.array([[1],[0]]),
+#     np.array([[0],[1]])
+# ]
+
+# XOR gate training data
+X = [
+    np.array([[0],[0]]),
+    np.array([[0],[1]]),
+    np.array([[1],[0]]),
+    np.array([[1],[1]])
+]
+
+Y = [
+    np.array([[1],[0]]),
+    np.array([[0],[1]]),
+    np.array([[0],[1]]),
+    np.array([[1],[0]])
+]
+
+eta = 1
+epochs = 10000
+for epoch in range(epochs):
+    for x, y in zip(X, Y):
+        h, a = feedforward(weights, x, biases)
+        grad_W, grad_b = backpropagation(weights, h, a, y)
+        weights = [W - eta * dW for W, dW in zip(weights, grad_W)]
+        biases = [b - eta * db for b, db in zip(biases, grad_b)]
+
+print("Final weights and biases:")
+for i in range(L):
+    print(f"Layer {i+1} weights:\n{weights[i]}")
+    print(f"Layer {i+1} biases:\n{biases[i]}")
+
+output = feedforward(weights, X[3], biases)[0][-1]
+print(f"Output for input [1, 1]:\n{output}")
