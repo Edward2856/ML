@@ -112,7 +112,7 @@ for epoch in range(epochs):
 # output = feedforward(weights, X[3], biases)[0][-1]
 # print(f"Output for input [1, 1]:\n{output}")
 
-output = feedforward(weights, X[5].reshape(-1,1), biases)[0][-1]
+output = feedforward(weights, X[51].reshape(-1,1), biases)[0][-1]
 print(f"Predicted output: {output}")
-real = Y[5].reshape(-1,1)
+real = Y[51].reshape(-1,1)
 print(f"Real label: {real}")
