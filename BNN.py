@@ -131,7 +131,7 @@ Y = data["Survived"].to_numpy().reshape(-1, 1)
 Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
 
 
-eta = 1
+eta = 0.1
 beta = 0.9
 epochs = 5000
 v_W, v_b = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases]
