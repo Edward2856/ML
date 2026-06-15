@@ -25,10 +25,10 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 6, 10, 2
+d, n, k = 6, 32, 2
 layer_sizes = [d, n, n, k]
 L = len(layer_sizes) - 1
-B = 32
+B = 128
 weights, biases = [], []
 for i in range(L):
     weights.append(np.random.randn(layer_sizes[i], layer_sizes[i+1]) / np.sqrt(layer_sizes[i]))
@@ -119,7 +119,7 @@ Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
 
 
 eta = 0.01
-epochs = 1000
+epochs = 5000
 mem = 0.9
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(W) for W in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 
