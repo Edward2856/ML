@@ -31,11 +31,11 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 d, n, k = 6, 32, 2
 layer_sizes = [d, n, n, k]
-B = 32
+B = 128
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
 for i in range(L):
-    weights.append(np.random.randn(layer_sizes[i], layer_sizes[i+1]))
+    weights.append(np.random.randn(layer_sizes[i], layer_sizes[i+1]) * np.sqrt(2/(layer_sizes[i] + layer_sizes[i+1])))
     biases.append(np.random.randn(layer_sizes[i+1],1))
 
 for i in range(L-1):
@@ -148,8 +148,9 @@ Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
 
 
 eta = 0.01
+decay = 0.95
 mem = 0.9
-epochs = 2000
+epochs = 3000
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 
 for epoch in range(epochs):
@@ -177,7 +178,7 @@ for epoch in range(epochs):
                 v_beta[i] = mem * v_beta[i] + (1 - mem) * grad_beta[i]
                 gamma[i] -= eta * v_gamma[i]
                 beta[i] -= eta * v_beta[i]
-
+    # eta *= decay
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
     #     y = y.reshape(-1,1)
