@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import idx2numpy as idx2np
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -20,18 +21,18 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
     if training:
         x_hat = (x - mu) / np.sqrt(var + eps)
         # Update running statistics
-        running_mean[:] = momentum * running_mean + (1 - momentum) * mu
-        running_var[:] = momentum * running_var + (1 - momentum) * var
+        running_mean = momentum * running_mean + (1 - momentum) * mu
+        running_var = momentum * running_var + (1 - momentum) * var
     else:
         x_hat = (x - running_mean) / np.sqrt(running_var + eps)
     cache = (x_hat, gamma, beta, mu, var, eps)
-    return gamma * x_hat + beta, cache
+    return gamma * x_hat + beta, cache, running_mean, running_var
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 6, 32, 2
+d, n, k = 784, 128, 10
 layer_sizes = [d, n, n, k]
-B = 128
+B = 256
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
 for i in range(L):
@@ -55,7 +56,7 @@ def feedforward(W, x, b, gamma, beta, training=True):
         if i == L - 1:
             h.append(softmax(a[-1]))
         else:
-            h_i, cache = batchnorm(a[-1], gamma[i], beta[i], running_means[i], running_vars[i], training=training)
+            h_i, cache, running_means[i], running_vars[i] = batchnorm(a[-1], gamma[i], beta[i], running_means[i], running_vars[i], training=training)
             caches.append(cache)
             bn_outputs.append(h_i)
             h.append(binarize(h_i))
@@ -85,8 +86,8 @@ def backpropagation(W, h, y, gamma, beta, caches, bn_outputs, eps=1e-5):
         cache = caches[i]
         a_hat = cache[0]
         var = cache[4]
-        grad_gamma.append(np.sum(G * a_hat, axis=1, keepdims=True))
-        grad_beta.append(np.sum(G, axis=1, keepdims=True))
+        grad_gamma.append(np.sum(G * a_hat, axis=1, keepdims=True) / batch_size)
+        grad_beta.append(np.sum(G, axis=1, keepdims=True) / batch_size)
         grad_a.append((Q - np.mean(Q, axis=1, keepdims=True) - a_hat * np.mean(Q * a_hat, axis=1, keepdims=True)) / np.sqrt(var + eps))
         grad_W.append((h[i] @ grad_a[-1].T) / batch_size)
         grad_b.append(np.sum(grad_a[-1], axis=1, keepdims=True) / batch_size)
@@ -138,46 +139,54 @@ def backpropagation(W, h, y, gamma, beta, caches, bn_outputs, eps=1e-5):
 #     np.array([[1],[0]])
 # ]
 
-# Titanic dataset
-data = pd.read_csv(r"D:\NITPY\IITM Internship\ML\train.csv")
-data["Age"] = data["Age"].fillna(data["Age"].median())
-X = data[["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare"]].to_numpy()
-X = (X - np.mean(X, axis=0)) / (np.std(X, axis=0) + 1e-8)  # Normalize features
-Y = data["Survived"].to_numpy().reshape(-1, 1)
-Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
+# # Titanic dataset
+# data = pd.read_csv(r"D:\NITPY\IITM Internship\ML\train.csv")
+# data["Age"] = data["Age"].fillna(data["Age"].median())
+# X = data[["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare"]].to_numpy()
+# X = (X - np.mean(X, axis=0)) / (np.std(X, axis=0) + 1e-8)  # Normalize features
+# Y = data["Survived"].to_numpy().reshape(-1, 1)
+# Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
+
+# MNIST Dataset
+data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-images.idx3-ubyte')
+data = data/255
+X = data.reshape(60000,784).T
+labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-labels.idx1-ubyte')
+Y = np.eye(10)[labels].T
+
 
 
 eta = 0.01
 decay = 0.95
 mem = 0.9
-epochs = 3000
+epochs = 1000
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 
 for epoch in range(epochs):
     perm = np.random.permutation(X.shape[0])
-    X_shuffled = X[perm]
-    Y_shuffled = Y[perm]
+    X_shuffled = X[:,perm]
+    Y_shuffled = Y[:,perm]
     for start in range(0, X.shape[0], B):
         end = start + B
         lookahead_W = [w - mem * v for w, v in zip(weights, v_W)]
         lookahead_b = [b - mem * v for b, v in zip(biases, v_b)]
         lookahead_gamma = [g - mem * v for g, v in zip(gamma, v_gamma)]
         lookahead_beta = [b - mem * v for b, v in zip(beta, v_beta)]
-        x_batch = X_shuffled[start:end].T
-        y_batch = Y_shuffled[start:end].T
+        x_batch = X_shuffled[:,start:end]
+        y_batch = Y_shuffled[:,start:end]
         h, a, caches, bn_outputs = feedforward(lookahead_W, x_batch, lookahead_b, lookahead_gamma, lookahead_beta)
         grad_W, grad_b, grad_gamma, grad_beta = backpropagation(lookahead_W, h, y_batch, lookahead_gamma, lookahead_beta, caches, bn_outputs)
         for i in range(L):
-            v_W[i] = mem * v_W[i] + (1 - mem) * grad_W[i]
-            v_b[i] = mem * v_b[i] + (1 - mem) * grad_b[i]
-            weights[i] -= eta * v_W[i]
-            biases[i] -= eta * v_b[i]
+            v_W[i] = mem * v_W[i] + eta * grad_W[i]
+            v_b[i] = mem * v_b[i] + eta * grad_b[i]
+            weights[i] -= v_W[i]
+            biases[i] -= v_b[i]
             weights[i] = np.clip(weights[i], -1, 1)
             if i < L - 1:
-                v_gamma[i] = mem * v_gamma[i] + (1 - mem) * grad_gamma[i]
-                v_beta[i] = mem * v_beta[i] + (1 - mem) * grad_beta[i]
-                gamma[i] -= eta * v_gamma[i]
-                beta[i] -= eta * v_beta[i]
+                v_gamma[i] = mem * v_gamma[i] + eta * grad_gamma[i]
+                v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
+                gamma[i] -= v_gamma[i]
+                beta[i] -= v_beta[i]
     # eta *= decay
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
@@ -203,13 +212,28 @@ for epoch in range(epochs):
 # real = Y[51].reshape(-1,1)
 # print(f"Real label: {real}")
 
-#accuracy
+# #accuracy
+# correct = 0
+# for x, y in zip(X, Y):
+#     x = x.reshape(-1,1)
+#     y = y.reshape(-1,1)
+#     output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
+#     if np.argmax(output) == np.argmax(y):
+#         correct += 1
+
+# print(f"Accuracy: {correct / len(X) * 100:.4f}%")
+
+# accuracy
+data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-images.idx3-ubyte')
+data = data/255
+X = data.reshape(10000,784).T
+labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-labels.idx1-ubyte')
+Y = np.eye(10)[labels].T
 correct = 0
-for x, y in zip(X, Y):
-    x = x.reshape(-1,1)
-    y = y.reshape(-1,1)
+for i in range(10000):
+    x = X[:,i:i+1]
+    y = Y[:,i:i+1]
     output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
     if np.argmax(output) == np.argmax(y):
         correct += 1
-
-print(f"Accuracy: {correct / len(X) * 100:.4f}%")
+print(f"Accuracy: {correct / 10000 * 100:.4f}%")

@@ -146,8 +146,8 @@ for epoch in range(epochs):
             if i < L-1:
                 v_gamma[i] = mem * v_gamma[i] + eta * grad_gamma[i]
                 v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
-                gamma[i] -= eta * grad_gamma[i]
-                beta[i] -= eta * grad_beta[i]
+                gamma[i] -= grad_gamma[i]
+                beta[i] -= grad_beta[i]
 
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
