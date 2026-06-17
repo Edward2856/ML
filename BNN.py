@@ -31,7 +31,7 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 # print(softmax(np.array([1, 2, 3])))
 
 d, n, k = 784, 128, 10
-layer_sizes = [d, n, n, k]
+layer_sizes = [d, 256, 128, 32, k]
 B = 256
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
@@ -156,7 +156,7 @@ Y = np.eye(10)[labels].T
 
 
 
-eta = 0.01
+eta = 0.5
 decay = 0.95
 mem = 0.9
 epochs = 1000
