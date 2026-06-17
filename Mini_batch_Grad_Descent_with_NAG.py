@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import idx2numpy as idx2np
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -13,8 +14,8 @@ def softmax(z):
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 6, 32, 2
-layer_sizes = [d, n, n, k]
+d, n, k = 784, 32, 10
+layer_sizes = [d, 256, 128, 32, k]
 L = len(layer_sizes) - 1
 B = 32
 weights, biases = [], []
@@ -77,30 +78,36 @@ def backpropagation(W, h, y):
 #     np.array([[1],[0]])
 # ]
 
-# Titanic dataset
-data = pd.read_csv(r"D:\NITPY\IITM Internship\ML\train.csv")
-data["Age"] = data["Age"].fillna(data["Age"].median())
-X = data[["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare"]].to_numpy()
-X = (X - np.mean(X, axis=0)) / (np.std(X, axis=0) + 1e-8)  # Normalize features
-Y = data["Survived"].to_numpy().reshape(-1, 1)
-Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
+# # Titanic dataset
+# data = pd.read_csv(r"D:\NITPY\IITM Internship\ML\train.csv")
+# data["Age"] = data["Age"].fillna(data["Age"].median())
+# X = data[["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare"]].to_numpy()
+# X = (X - np.mean(X, axis=0)) / (np.std(X, axis=0) + 1e-8)  # Normalize features
+# Y = data["Survived"].to_numpy().reshape(-1, 1)
+# Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
 
+# MNIST Dataset
+data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-images.idx3-ubyte')
+data = data/255
+X = data.reshape(60000,784).T
+labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-labels.idx1-ubyte')
+Y = np.eye(10)[labels].T
 
 eta = 0.5
-epochs = 1000
+epochs = 500
 gamma = 0.9
 v_W, v_b = [np.zeros_like(W) for W in weights], [np.zeros_like(b) for b in biases]
 
 for epoch in range(epochs):
     perm = np.random.permutation(X.shape[0])
-    X_shuffled = X[perm]
-    Y_shuffled = Y[perm]
+    X_shuffled = X[:,perm]
+    Y_shuffled = Y[:,perm]
     for start in range(0, X.shape[0], B):
         end = start + B
         lookahead_W = [W - gamma * v for W, v in zip(weights, v_W)]
         lookahead_b = [b - gamma * v for b, v in zip(biases, v_b)]
-        x_batch = X_shuffled[start:end].T
-        y_batch = Y_shuffled[start:end].T
+        x_batch = X_shuffled[:,start:end]
+        y_batch = Y_shuffled[:,start:end]
         h, a = feedforward(lookahead_W, x_batch, lookahead_b)
         grad_W, grad_b = backpropagation(lookahead_W, h, y_batch)
         for i in range(L):
@@ -136,14 +143,29 @@ for epoch in range(epochs):
 # real = Y[51].reshape(-1,1)
 # print(f"Real label: {real}")
 
-#accuracy
+# #accuracy
+# correct = 0
+# for x, y in zip(X, Y):
+#     x = x.reshape(-1,1)
+#     y = y.reshape(-1,1)
+#     output = feedforward(weights, x, biases)[0][-1]
+#     predicted_label = np.argmax(output)
+#     true_label = np.argmax(y)
+#     if predicted_label == true_label:
+#         correct += 1
+# print(f"Accuracy: {correct / len(X) * 100:.4f}%")
+
+# accuracy
+data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-images.idx3-ubyte')
+data = data/255
+X = data.reshape(10000,784).T
+labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-labels.idx1-ubyte')
+Y = np.eye(10)[labels].T
 correct = 0
-for x, y in zip(X, Y):
-    x = x.reshape(-1,1)
-    y = y.reshape(-1,1)
+for i in range(10000):
+    x = X[:,i:i+1]
+    y = Y[:,i:i+1]
     output = feedforward(weights, x, biases)[0][-1]
-    predicted_label = np.argmax(output)
-    true_label = np.argmax(y)
-    if predicted_label == true_label:
+    if np.argmax(output) == np.argmax(y):
         correct += 1
-print(f"Accuracy: {correct / len(X) * 100:.4f}%")
+print(f"Accuracy: {correct / 10000 * 100:.4f}%")
