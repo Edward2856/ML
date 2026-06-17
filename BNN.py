@@ -31,8 +31,8 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 # print(softmax(np.array([1, 2, 3])))
 
 d, n, k = 784, 128, 10
-layer_sizes = [d, 256, 128, 32, k]
-B = 256
+layer_sizes = [d, 324, 256, k]
+B = 128
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
 for i in range(L):
@@ -156,17 +156,17 @@ Y = np.eye(10)[labels].T
 
 
 
-eta = 0.5
+eta = 0.7
 decay = 0.95
-mem = 0.9
-epochs = 1000
+mem = 0.8
+epochs = 100
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 
 for epoch in range(epochs):
-    perm = np.random.permutation(X.shape[0])
+    perm = np.random.permutation(X.shape[1])
     X_shuffled = X[:,perm]
     Y_shuffled = Y[:,perm]
-    for start in range(0, X.shape[0], B):
+    for start in range(0, X.shape[1], B):
         end = start + B
         lookahead_W = [w - mem * v for w, v in zip(weights, v_W)]
         lookahead_b = [b - mem * v for b, v in zip(biases, v_b)]
@@ -223,7 +223,17 @@ for epoch in range(epochs):
 
 # print(f"Accuracy: {correct / len(X) * 100:.4f}%")
 
-# accuracy
+# #training accuracy
+# correct = 0
+# for i in range(60000):
+#     x = X[:,i:i+1]
+#     y = Y[:,i:i+1]
+#     output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
+#     if np.argmax(output) == np.argmax(y):
+#         correct += 1
+# print(f"Training Accuracy: {correct / 60000 * 100:.4f}%")
+
+# testing accuracy
 data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-images.idx3-ubyte')
 data = data/255
 X = data.reshape(10000,784).T
@@ -236,4 +246,4 @@ for i in range(10000):
     output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
     if np.argmax(output) == np.argmax(y):
         correct += 1
-print(f"Accuracy: {correct / 10000 * 100:.4f}%")
+print(f"Testing Accuracy: {correct / 10000 * 100:.4f}%")
