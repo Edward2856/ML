@@ -148,10 +148,10 @@ def backpropagation(W, h, y, gamma, beta, caches, bn_outputs, eps=1e-5):
 # Y = np.hstack((1 - Y, Y))  # Convert to one-hot encoding
 
 # MNIST Dataset
-data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-images.idx3-ubyte')
+data = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-images.idx3-ubyte')
 data = data/255
 X = data.reshape(60000,784).T
-labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\train-labels.idx1-ubyte')
+labels = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-labels.idx1-ubyte')
 Y = np.eye(10)[labels].T
 
 
@@ -159,7 +159,7 @@ Y = np.eye(10)[labels].T
 eta = 0.7
 decay = 0.95
 mem = 0.8
-epochs = 100
+epochs = 10
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 
 for epoch in range(epochs):
@@ -187,6 +187,27 @@ for epoch in range(epochs):
                 v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
                 gamma[i] -= v_gamma[i]
                 beta[i] -= v_beta[i]
+
+    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+    pred = np.argmax(output, axis=0)
+    true = np.argmax(Y, axis=0)
+    accuracy_train = np.mean(pred == true)
+
+    data_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
+    data_t = data_t/255
+    X_t = data_t.reshape(10000,784).T
+    labels_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-labels.idx1-ubyte')
+    Y_t = np.eye(10)[labels_t].T
+    output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
+    pred = np.argmax(output, axis=0)
+    true = np.argmax(Y_t, axis=0)
+    accuracy_test = np.mean(pred == true)
+
+    print(
+        f'Epochs:{epoch+1}/{epochs} | '
+        f'Testing Accuracy: {accuracy_test * 100:.4f} | '
+        f'Training Accuracy: {accuracy_train * 100:.4f}'
+    )
     # eta *= decay
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
@@ -234,16 +255,22 @@ for epoch in range(epochs):
 # print(f"Training Accuracy: {correct / 60000 * 100:.4f}%")
 
 # testing accuracy
-data = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-images.idx3-ubyte')
-data = data/255
-X = data.reshape(10000,784).T
-labels = idx2np.convert_from_file(r'D:\NITPY\IITM Internship\ML\MNIST\t10k-labels.idx1-ubyte')
-Y = np.eye(10)[labels].T
-correct = 0
-for i in range(10000):
-    x = X[:,i:i+1]
-    y = Y[:,i:i+1]
-    output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
-    if np.argmax(output) == np.argmax(y):
-        correct += 1
-print(f"Testing Accuracy: {correct / 10000 * 100:.4f}%")
+# data = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
+# data = data/255
+# X = data.reshape(10000,784).T
+# labels = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-labels.idx1-ubyte')
+# Y = np.eye(10)[labels].T
+# output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+# pred = np.argmax(output, axis=0)
+# true = np.argmax(Y, axis=0)
+# accuracy = np.mean(pred == true)
+
+# correct = 0
+# for i in range(10000):
+#     x = X[:,i:i+1]
+#     y = Y[:,i:i+1]
+#     output = feedforward(weights, x, biases, gamma, beta, training=False)[0][-1]
+#     if np.argmax(output) == np.argmax(y):
+#         correct += 1
+
+# print(f"Testing Accuracy: {accuracy * 100:.4f}%")
