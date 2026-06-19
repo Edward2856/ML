@@ -30,8 +30,8 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 784, 256, 10
-layer_sizes = [d, n, n, n, k]
+d, n, k = 784, 1024, 10
+layer_sizes = [d, n, n, k]
 B = 128
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
