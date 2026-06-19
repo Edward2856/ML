@@ -30,8 +30,8 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 784, 128, 10
-layer_sizes = [d, 324, 256, k]
+d, n, k = 784, 256, 10
+layer_sizes = [d, n, n, n, k]
 B = 128
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
@@ -188,10 +188,10 @@ for epoch in range(epochs):
                 gamma[i] -= v_gamma[i]
                 beta[i] -= v_beta[i]
 
-    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-    pred = np.argmax(output, axis=0)
-    true = np.argmax(Y, axis=0)
-    accuracy_train = np.mean(pred == true)
+    # output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+    # pred = np.argmax(output, axis=0)
+    # true = np.argmax(Y, axis=0)
+    # accuracy_train = np.mean(pred == true)
 
     data_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
     data_t = data_t/255
@@ -205,9 +205,9 @@ for epoch in range(epochs):
 
     print(
         f'Epochs:{epoch+1}/{epochs} | '
-        f'Testing Accuracy: {accuracy_test * 100:.4f} | '
-        f'Training Accuracy: {accuracy_train * 100:.4f}'
-    )
+        f'Testing Accuracy: {accuracy_test * 100:.4f}')
+    #     f'Training Accuracy: {accuracy_train * 100:.4f}'
+    # )
     # eta *= decay
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
