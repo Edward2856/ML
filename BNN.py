@@ -30,7 +30,7 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 # print(softmax(np.array([1, 2, 3])))
 
-d, n, k = 784, 1024, 10
+d, n, k = 784, 324, 10
 layer_sizes = [d, n, n, k]
 B = 128
 L = len(layer_sizes) - 1
@@ -154,13 +154,12 @@ X = data.reshape(60000,784).T
 labels = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-labels.idx1-ubyte')
 Y = np.eye(10)[labels].T
 
-
-
 eta = 0.7
 decay = 0.95
 mem = 0.8
-epochs = 10
+epochs = 100
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
+accuracy_history = []
 
 for epoch in range(epochs):
     perm = np.random.permutation(X.shape[1])
@@ -202,12 +201,16 @@ for epoch in range(epochs):
     pred = np.argmax(output, axis=0)
     true = np.argmax(Y_t, axis=0)
     accuracy_test = np.mean(pred == true)
+    accuracy_history.append(accuracy_test)
 
     print(
         f'Epochs:{epoch+1}/{epochs} | '
         f'Testing Accuracy: {accuracy_test * 100:.4f}')
     #     f'Training Accuracy: {accuracy_train * 100:.4f}'
     # )
+
+np.save("BNN_accuracy.npy", np.array(accuracy_history))
+
     # eta *= decay
     # for x, y in zip(X, Y):
     #     x = x.reshape(-1,1)
