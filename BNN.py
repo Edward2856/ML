@@ -154,10 +154,17 @@ X = data.reshape(60000,784).T
 labels = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-labels.idx1-ubyte')
 Y = np.eye(10)[labels].T
 
+# Testing dataset
+data_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
+data_t = data_t/255
+X_t = data_t.reshape(10000,784).T
+labels_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-labels.idx1-ubyte')
+Y_t = np.eye(10)[labels_t].T
+
 eta = 0.7
 decay = 0.95
 mem = 0.8
-epochs = 100
+epochs = 10
 v_W, v_b, v_gamma, v_beta = [np.zeros_like(w) for w in weights], [np.zeros_like(b) for b in biases], [np.zeros_like(g) for g in gamma], [np.zeros_like(b) for b in beta]
 accuracy_history = []
 
@@ -192,11 +199,6 @@ for epoch in range(epochs):
     # true = np.argmax(Y, axis=0)
     # accuracy_train = np.mean(pred == true)
 
-    data_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
-    data_t = data_t/255
-    X_t = data_t.reshape(10000,784).T
-    labels_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-labels.idx1-ubyte')
-    Y_t = np.eye(10)[labels_t].T
     output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
     pred = np.argmax(output, axis=0)
     true = np.argmax(Y_t, axis=0)
