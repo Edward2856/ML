@@ -26,10 +26,10 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
     cache = (x_hat, gamma, beta, mu, var, eps)
     return gamma * x_hat + beta, cache, running_mean, running_var
 
-d, n, k = 784, 1024, 10
-layer_sizes = [d, n, n, k]
+d, n, k = 784, 4096, 10
+layer_sizes = [d, n, n, n, k]
 L = len(layer_sizes) - 1
-B = 128
+B = 600
 weights, biases = [], []
 for i in range(L):
     weights.append(torch.randn(layer_sizes[i], layer_sizes[i+1], device=device) / np.sqrt(layer_sizes[i]))
@@ -102,7 +102,7 @@ X_t = torch.load('test_images.pt', map_location=device)
 Y_t = torch.load('test_labels.pt', map_location=device)
 
 eta = 0.7
-epochs = 10
+epochs = 20
 mem = 0.8
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(W, device=device) for W in weights], [torch.zeros_like(b, device=device) for b in biases], [torch.zeros_like(g, device=device) for g in gamma], [torch.zeros_like(b, device=device) for b in beta]
 accuracy_history = []
@@ -132,10 +132,10 @@ for epoch in range(epochs):
                 gamma[i] -= v_gamma[i]
                 beta[i] -= v_beta[i]
 
-    # output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-    # pred = np.argmax(output, axis=0)
-    # true = np.argmax(Y, axis=0)
-    # accuracy_train = np.mean(pred == true)
+    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+    pred = torch.argmax(output, dim=0)
+    true = torch.argmax(Y, dim=0)
+    accuracy_train = (pred == true).float().mean().item()
 
     output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
     pred = torch.argmax(output, dim=0)
@@ -145,8 +145,8 @@ for epoch in range(epochs):
 
     print(
         f'Epochs:{epoch+1}/{epochs} | '
-        f'Testing Accuracy: {accuracy_test * 100:.4f}')
-    #     f'Training Accuracy: {accuracy_train * 100:.4f}'
-    # )
+        f'Testing Accuracy: {accuracy_test * 100:.2f} | '
+        f'Training Accuracy: {accuracy_train * 100:.2f}'
+    )
 
 np.save("Real_weighted_model_accuracy.npy", np.array(accuracy_history))

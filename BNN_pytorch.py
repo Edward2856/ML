@@ -29,9 +29,9 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
     cache = (x_hat, gamma, beta, mu, var, eps)
     return gamma * x_hat + beta, cache, running_mean, running_var
 
-d, n, k = 784, 324, 10
-layer_sizes = [d, n, n, k]
-B = 128
+d, n, k = 784, 4096, 10
+layer_sizes = [d, n, n, n, k]
+B = 600
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
 for i in range(L):
@@ -100,7 +100,7 @@ Y_t = torch.load('test_labels.pt', map_location=device)
 eta = 0.7
 decay = 0.95
 mem = 0.8
-epochs = 10
+epochs = 20
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(w) for w in weights], [torch.zeros_like(b) for b in biases], [torch.zeros_like(g) for g in gamma], [torch.zeros_like(b) for b in beta]
 accuracy_history = []
 
@@ -129,10 +129,10 @@ for epoch in range(epochs):
                 gamma[i] -= v_gamma[i]
                 beta[i] -= v_beta[i]
 
-    # output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-    # pred = np.argmax(output, axis=0)
-    # true = np.argmax(Y, axis=0)
-    # accuracy_train = np.mean(pred == true)
+    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+    pred = torch.argmax(output, dim=0)
+    true = torch.argmax(Y, dim=0)
+    accuracy_train = (pred == true).float().mean().item()
 
     output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
     pred = torch.argmax(output, dim=0)
@@ -142,8 +142,8 @@ for epoch in range(epochs):
 
     print(
         f'Epochs:{epoch+1}/{epochs} | '
-        f'Testing Accuracy: {accuracy_test * 100:.4f}')
-    #     f'Training Accuracy: {accuracy_train * 100:.4f}'
-    # )
+        f'Testing Accuracy: {accuracy_test * 100:.2f} | '
+        f'Training Accuracy: {accuracy_train * 100:.2f}'
+    )
 
 np.save("BNN_accuracy.npy", np.array(accuracy_history))
