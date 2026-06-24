@@ -80,24 +80,11 @@ def backpropagation(W, h, y, gamma, beta, caches, eps=1e-5):
     grad_beta.reverse()
     return grad_W, grad_b, grad_gamma, grad_beta
 
-# # MNIST Dataset
-# data = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-images.idx3-ubyte')
-# data = data/255
-# X = torch.tensor(data.reshape(60000,784).T, dtype=torch.float32, device=device)
-# labels = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/train-labels.idx1-ubyte')
-# Y = torch.tensor(np.eye(10)[labels].T, dtype=torch.float32, device=device)
-# torch.save(X, 'train_images.pt')
-# torch.save(Y, 'train_labels.pt')
+# Training data
 X = torch.load('train_images.pt', map_location=device)
 Y = torch.load('train_labels.pt', map_location=device)
 
-# data_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-images.idx3-ubyte')
-# data_t = data_t/255
-# X_t = torch.tensor(data_t.reshape(10000,784).T, dtype=torch.float32, device=device)
-# labels_t = idx2np.convert_from_file(r'/home/saurav/edward/ML/MNIST/t10k-labels.idx1-ubyte')
-# Y_t = torch.tensor(np.eye(10)[labels_t].T, dtype=torch.float32, device=device)
-# torch.save(X_t, 'test_images.pt')
-# torch.save(Y_t, 'test_labels.pt')
+# Testing data
 X_t = torch.load('test_images.pt', map_location=device)
 Y_t = torch.load('test_labels.pt', map_location=device)
 
@@ -122,40 +109,31 @@ for epoch in range(epochs):
         
         grad_W, grad_b, grad_gamma, grad_beta = backpropagation(lookahead_W, h, y_batch, lookahead_gamma, lookahead_beta, caches)
         for i in range(L):
-            v_W[i].mul_(mem).add_(grad_W[i], alpha=eta)
-            v_b[i].mul_(mem).add_(grad_b[i], alpha=eta)
-            weights[i].sub_(v_W[i])
-            biases[i].sub_(v_b[i])
-            # v_W[i] = mem * v_W[i] + eta * grad_W[i]
-            # v_b[i] = mem * v_b[i] + eta * grad_b[i]
-            # weights[i] -= v_W[i]
-            # biases[i] -= v_b[i]
+            v_W[i] = mem * v_W[i] + eta * grad_W[i]
+            v_b[i] = mem * v_b[i] + eta * grad_b[i]
+            weights[i] -= v_W[i]
+            biases[i] -= v_b[i]
             if i < L-1:
-                v_gamma[i].mul_(mem).add_(grad_gamma[i], alpha=eta)
-                v_beta[i].mul_(mem).add_(grad_beta[i], alpha=eta)
-                gamma[i].sub_(v_gamma[i])
-                beta[i].sub_(v_beta[i])
-                # v_gamma[i] = mem * v_gamma[i] + eta * grad_gamma[i]
-                # v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
-                # gamma[i] -= v_gamma[i]
-                # beta[i] -= v_beta[i]
+                v_gamma[i] = mem * v_gamma[i] + eta * grad_gamma[i]
+                v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
+                gamma[i] -= v_gamma[i]
+                beta[i] -= v_beta[i]
 
-    with torch.no_grad():
-        output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-        pred = torch.argmax(output, dim=0)
-        true = torch.argmax(Y, dim=0)
-        accuracy_train = (pred == true).float().mean().item()
+    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+    pred = torch.argmax(output, dim=0)
+    true = torch.argmax(Y, dim=0)
+    accuracy_train = (pred == true).float().mean().item()
 
-        output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
-        pred = torch.argmax(output, dim=0)
-        true = torch.argmax(Y_t, dim=0)
-        accuracy_test = (pred == true).float().mean().item()
-        accuracy_history.append(accuracy_test)
+    output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
+    pred = torch.argmax(output, dim=0)
+    true = torch.argmax(Y_t, dim=0)
+    accuracy_test = (pred == true).float().mean().item()
+    accuracy_history.append(accuracy_test)
 
-        print(
-            f'Epochs:{epoch+1}/{epochs} | '
-            f'Testing Accuracy: {accuracy_test * 100:.2f} | '
-            f'Training Accuracy: {accuracy_train * 100:.2f}'
-        )
+    print(
+        f'Epochs:{epoch+1}/{epochs} | '
+        f'Testing Accuracy: {accuracy_test * 100:.2f} | '
+        f'Training Accuracy: {accuracy_train * 100:.2f}'
+    )
 
 np.save("Real_weighted_model_accuracy.npy", np.array(accuracy_history))

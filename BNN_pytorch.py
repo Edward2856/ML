@@ -118,32 +118,34 @@ for epoch in range(epochs):
         h, a, caches, bn_outputs = feedforward(lookahead_W, x_batch, lookahead_b, lookahead_gamma, lookahead_beta)
         grad_W, grad_b, grad_gamma, grad_beta = backpropagation(lookahead_W, h, y_batch, lookahead_gamma, lookahead_beta, caches, bn_outputs)
         for i in range(L):
-            v_W[i] = mem * v_W[i] + eta * grad_W[i]
-            v_b[i] = mem * v_b[i] + eta * grad_b[i]
-            weights[i] -= v_W[i]
-            biases[i] -= v_b[i]
-            weights[i] = torch.clamp(weights[i], -1, 1)
+            v_W[i].mul_(mem).add_(grad_W[i], alpha=eta)
+            v_b[i].mul_(mem).add_(grad_b[i], alpha=eta)
+            weights[i].sub_(v_W[i])
+            biases[i].sub_(v_b[i])
+            weights[i].clamp_(-1, 1)
+            # weights[i] = torch.clamp(weights[i], -1, 1)
             if i < L - 1:
-                v_gamma[i] = mem * v_gamma[i] + eta * grad_gamma[i]
-                v_beta[i] = mem * v_beta[i] + eta * grad_beta[i]
-                gamma[i] -= v_gamma[i]
-                beta[i] -= v_beta[i]
+                v_gamma[i].mul_(mem).add_(grad_gamma[i], alpha=eta)
+                v_beta[i].mul_(mem).add_(grad_beta[i], alpha=eta)
+                gamma[i].sub_(v_gamma[i])
+                beta[i].sub_(v_beta[i])
 
-    output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-    pred = torch.argmax(output, dim=0)
-    true = torch.argmax(Y, dim=0)
-    accuracy_train = (pred == true).float().mean().item()
+    with torch.no_grad():
+        output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+        pred = torch.argmax(output, dim=0)
+        true = torch.argmax(Y, dim=0)
+        accuracy_train = (pred == true).float().mean().item()
 
-    output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
-    pred = torch.argmax(output, dim=0)
-    true = torch.argmax(Y_t, dim=0)
-    accuracy_test = (pred == true).float().mean().item()
-    accuracy_history.append(accuracy_test)
+        output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
+        pred = torch.argmax(output, dim=0)
+        true = torch.argmax(Y_t, dim=0)
+        accuracy_test = (pred == true).float().mean().item()
+        accuracy_history.append(accuracy_test)
 
-    print(
-        f'Epochs:{epoch+1}/{epochs} | '
-        f'Testing Accuracy: {accuracy_test * 100:.2f} | '
-        f'Training Accuracy: {accuracy_train * 100:.2f}'
-    )
+        print(
+            f'Epochs:{epoch+1}/{epochs} | '
+            f'Testing Accuracy: {accuracy_test * 100:.2f} | '
+            f'Training Accuracy: {accuracy_train * 100:.2f}'
+        )
 
 np.save("BNN_accuracy.npy", np.array(accuracy_history))
