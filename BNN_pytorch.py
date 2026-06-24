@@ -31,7 +31,7 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 
 d, n, k = 784, 4096, 10
 layer_sizes = [d, n, n, n, k]
-B = 600
+B = 1500
 L = len(layer_sizes) - 1
 weights, biases, gamma, beta, running_means, running_vars = [], [], [], [], [], []
 for i in range(L):

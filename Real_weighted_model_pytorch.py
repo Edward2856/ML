@@ -29,7 +29,7 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
 d, n, k = 784, 4096, 10
 layer_sizes = [d, n, n, n, k]
 L = len(layer_sizes) - 1
-B = 600
+B = 1500
 weights, biases = [], []
 for i in range(L):
     weights.append(torch.randn(layer_sizes[i], layer_sizes[i+1], device=device) / np.sqrt(layer_sizes[i]))
