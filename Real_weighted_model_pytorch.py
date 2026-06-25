@@ -102,7 +102,7 @@ X_t = torch.load('test_images.pt', map_location=device)
 Y_t = torch.load('test_labels.pt', map_location=device)
 
 eta = 0.7
-epochs = 20
+epochs = 1000
 mem = 0.8
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(W, device=device) for W in weights], [torch.zeros_like(b, device=device) for b in biases], [torch.zeros_like(g, device=device) for g in gamma], [torch.zeros_like(b, device=device) for b in beta]
 accuracy_history = []

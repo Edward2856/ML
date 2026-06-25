@@ -29,7 +29,7 @@ Y_t = torch.load("test_labels.pt").to(device)
 Y = torch.argmax(Y, dim=0)
 Y_t = torch.argmax(Y_t, dim=0)
 
-B = 600
+B = 1500
 
 train_loader = DataLoader(TensorDataset(X, Y), batch_size=B, shuffle=True)
 
@@ -37,7 +37,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.7)
 
 criterion = nn.CrossEntropyLoss()
 
-epochs = 20
+epochs = 1000
 accuracy_history = []
 for epoch in range(epochs):
     model.train()
