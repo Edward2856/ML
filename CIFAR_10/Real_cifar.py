@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from torchvision import datasets, transforms
+# from torchvision import datasets, transforms
 # import os
 # print(os.getcwd())
 
@@ -29,7 +29,7 @@ def batchnorm(x, gamma, beta, running_mean, running_var, training=True, momentum
     cache = (x_hat, gamma, beta, mu, var, eps)
     return gamma * x_hat + beta, cache, running_mean, running_var
 
-d, n, k = 32*32*3, 1024, 10
+d, n, k = 32*32*3, 4096, 10
 layer_sizes = [d, n, n, n, k]
 L = len(layer_sizes) - 1
 B = 1500
@@ -108,7 +108,7 @@ X_t = torch.load('test_images.pt', map_location=device)
 Y_t = torch.load('test_labels.pt', map_location=device)
 
 eta = 0.7
-epochs = 1000
+epochs = 200
 mem = 0.8
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(W, device=device) for W in weights], [torch.zeros_like(b, device=device) for b in biases], [torch.zeros_like(g, device=device) for g in gamma], [torch.zeros_like(b, device=device) for b in beta]
 accuracy_history = []
