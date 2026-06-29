@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 from torchvision import datasets, transforms
+# import os
+# print(os.getcwd())
 
 # torch.set_grad_enabled(False)
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -83,30 +85,30 @@ def backpropagation(W, h, y, gamma, beta, caches, eps=1e-5):
 
 # CIFAR-10 Dataset
 
-train_dataset = datasets.CIFAR10(root='./data', train=True, transform=transforms.ToTensor(), download=True)
-test_dataset = datasets.CIFAR10(root='./data', train=False, transform=transforms.ToTensor(), download=True)
+# train_dataset = datasets.CIFAR10(root='./data', train=True, transform=transforms.ToTensor(), download=True)
+# test_dataset = datasets.CIFAR10(root='./data', train=False, transform=transforms.ToTensor(), download=True)
 
-X = torch.stack([train_dataset[i][0].view(-1) for i in range(len(train_dataset))], dim=1).to(device)
-labels = torch.tensor(train_dataset.targets, device=device)
-Y = torch.nn.functional.one_hot(labels, num_classes=10).float().T
+# X = torch.stack([train_dataset[i][0].view(-1) for i in range(len(train_dataset))], dim=1).to(device)
+# labels = torch.tensor(train_dataset.targets, device=device)
+# Y = torch.nn.functional.one_hot(labels, num_classes=10).float().T
 
-X_t = torch.stack([test_dataset[i][0].view(-1) for i in range(len(test_dataset))], dim=1).to(device)
-test_labels = torch.tensor(test_dataset.targets, device=device)
-Y_t = torch.nn.functional.one_hot(test_labels, num_classes=10).float().T
+# X_t = torch.stack([test_dataset[i][0].view(-1) for i in range(len(test_dataset))], dim=1).to(device)
+# test_labels = torch.tensor(test_dataset.targets, device=device)
+# Y_t = torch.nn.functional.one_hot(test_labels, num_classes=10).float().T
 
-torch.save(X, 'train_images.pt')
-torch.save(Y, 'train_labels.pt')
-torch.save(X_t, 'test_images.pt')
-torch.save(Y_t, 'test_labels.pt')
+# torch.save(X, 'train_images.pt')
+# torch.save(Y, 'train_labels.pt')
+# torch.save(X_t, 'test_images.pt')
+# torch.save(Y_t, 'test_labels.pt')
 
-# X = torch.load('train_images.pt', map_location=device)
-# Y = torch.load('train_labels.pt', map_location=device)
+X = torch.load('train_images.pt', map_location=device)
+Y = torch.load('train_labels.pt', map_location=device)
 
-# X_t = torch.load('test_images.pt', map_location=device)
-# Y_t = torch.load('test_labels.pt', map_location=device)
+X_t = torch.load('test_images.pt', map_location=device)
+Y_t = torch.load('test_labels.pt', map_location=device)
 
 eta = 0.7
-epochs = 100
+epochs = 1000
 mem = 0.8
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(W, device=device) for W in weights], [torch.zeros_like(b, device=device) for b in biases], [torch.zeros_like(g, device=device) for g in gamma], [torch.zeros_like(b, device=device) for b in beta]
 accuracy_history = []
