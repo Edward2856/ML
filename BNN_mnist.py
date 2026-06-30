@@ -2,6 +2,8 @@ import numpy as np
 import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using device: {device}")
+print(f"Device name: {torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'}")
 
 def sigmoid(z):
     return torch.sigmoid(z)
@@ -98,7 +100,6 @@ X_t = torch.load('test_images.pt', map_location=device)
 Y_t = torch.load('test_labels.pt', map_location=device)
 
 eta = 0.7
-decay = 0.95
 mem = 0.8
 epochs = 100
 v_W, v_b, v_gamma, v_beta = [torch.zeros_like(w) for w in weights], [torch.zeros_like(b) for b in biases], [torch.zeros_like(g) for g in gamma], [torch.zeros_like(b) for b in beta]
@@ -131,10 +132,10 @@ for epoch in range(epochs):
                 beta[i].sub_(v_beta[i])
 
     with torch.no_grad():
-        output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
-        pred = torch.argmax(output, dim=0)
-        true = torch.argmax(Y, dim=0)
-        accuracy_train = (pred == true).float().mean().item()
+        # output = feedforward(weights, X, biases, gamma, beta, training=False)[0][-1]
+        # pred = torch.argmax(output, dim=0)
+        # true = torch.argmax(Y, dim=0)
+        # accuracy_train = (pred == true).float().mean().item()
 
         output = feedforward(weights, X_t, biases, gamma, beta, training=False)[0][-1]
         pred = torch.argmax(output, dim=0)
@@ -144,8 +145,9 @@ for epoch in range(epochs):
 
         print(
             f'Epochs:{epoch+1}/{epochs} | '
-            f'Testing Accuracy: {accuracy_test * 100:.2f} | '
-            f'Training Accuracy: {accuracy_train * 100:.2f}'
+            f'Testing Accuracy: {accuracy_test * 100:.2f}'
         )
+        #     f'Training Accuracy: {accuracy_train * 100:.2f}'
+        # )
 
 np.save("BNN_accuracy.npy", np.array(accuracy_history))
