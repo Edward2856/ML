@@ -51,7 +51,9 @@ def binarize(W, H=1.0, binary=True, stochastic=False):
         else:
             Wb = hard_sigmoid(W/H)
             Wb = round_ste(Wb) 
-            Wb = torch.where(Wb == 1, H, -H)
+            Wb = Wb * 2 - 1
+            Wb = Wb * H
+            # Wb = torch.where(Wb == 1, H, -H)    
     else:
         Wb = W
     return Wb
@@ -93,7 +95,7 @@ def build_layers(layer_specs):
             layer['beta'] = beta
             layer['running_mean'] = torch.zeros(last_out, device=device)
             layer['running_var'] = torch.ones(last_out, device=device)
-        elif spec['type'] in ('activation', 'pool', 'flatten'):
+        elif spec['type'] in ('activation', 'pool', 'flatten', 'dropout'):
             pass  # No parameters to initialize
         else:
             raise ValueError(f"Unsupported layer type: {spec['type']}")
@@ -116,8 +118,12 @@ def forward(x, layers, training=True):
         elif layer['type'] == 'flatten':
             x = torch.flatten(x, start_dim=1)
         elif layer['type'] == 'batchnorm':
-            x = F.batch_norm(x, running_mean=layer['running_mean'], running_var=layer['running_var'], weight=layer['gamma'], bias=layer['beta'], training=training, momentum=0.1, eps=1e-5)
-    
+            x = F.batch_norm(x, running_mean=layer['running_mean'], running_var=layer['running_var'], weight=layer['gamma'], bias=layer['beta'], training=training, momentum=0.9, eps=1e-4)
+        elif layer['type'] == 'dropout':
+            if training:
+                x = F.dropout(x, p=layer['p'], training=True)
+        else:
+            raise ValueError(f"Unsupported layer type: {layer['type']}")
     return x
 
 def clip_weights(layers):
@@ -125,3 +131,6 @@ def clip_weights(layers):
         if layer['type'] in ('linear', 'conv'):
             with torch.no_grad():
                 layer['W'].clamp_(-layer['H'], layer['H'])
+
+def squared_hinge_loss(outputs, targets):
+    return torch.mean(torch.clamp(1 - outputs * targets, min=0) ** 2)
