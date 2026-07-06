@@ -8,13 +8,18 @@ transform = transforms.Compose([
 ])
 
 train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-train_loader = DataLoader(train_dataset, batch_size=50, shuffle=True, num_workers=4, pin_memory=True)
+train_loader = DataLoader(train_dataset, batch_size=1500, shuffle=True, num_workers=4, pin_memory=True)
 
 test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
 test_loader = DataLoader(test_dataset, batch_size=10000, shuffle=False, num_workers=4, pin_memory=True)
 X_t, Y_t = next(iter(test_loader))
 X_t = X_t.to(device)
 Y_t = Y_t.to(device)
+
+lr_start = 1e-3
+lr_end = 3e-7
+epochs = 500
+lr_decay = (lr_end / lr_start) ** (1 / epochs)
 
 layer_specs = [
     {'type': 'conv', 'in': 3, 'out': 128, 'kernel_size': 3, 'stride': 1, 'padding': 1},
