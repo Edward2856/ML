@@ -1,10 +1,12 @@
-from mnist import *
-# from cifar import *
+# from mnist import *
+from cifar import *
 # from svhn import *
 # from setproctitle import setproctitle
+import os
 
 # setproctitle("mnist_bnn_2000_batch_size")
 
+print(f"PID: {os.getpid()}")
 print(f"Using device: {device}")
 print(f"Device name: {torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'}")
 
@@ -26,6 +28,12 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         clip_weights(layers)
+
+    # for layer in layers:
+    #     if layer['type'] == 'batchnorm':
+    #         print("Mean:", layer['running_mean'][:5].cpu())
+    #         print("Var :", layer['running_var'][:5].cpu())
+    #         break
     lr *= lr_decay
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr

@@ -4,7 +4,9 @@ from torch.utils.data import DataLoader
 
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    transforms.Normalize(
+        (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
+        )
 ])
 
 train_dataset = datasets.SVHN(root='./data', split='train', download=True, transform=transform)
