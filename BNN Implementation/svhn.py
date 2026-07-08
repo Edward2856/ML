@@ -2,17 +2,29 @@ from network import *
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-transform = transforms.Compose([
+train_transform = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
     transforms.ToTensor(),
     transforms.Normalize(
-        (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
+        mean=(0.4371, 0.4438, 0.4728),
+        std=(0.1980, 0.2010, 0.1970)
         )
 ])
 
-train_dataset = datasets.SVHN(root='./data', split='train', download=True, transform=transform)
-train_loader = DataLoader(train_dataset, batch_size=750, shuffle=True, num_workers=4, pin_memory=True)
+test_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=(0.4371, 0.4438, 0.4728),
+        std=(0.1980, 0.2010, 0.1970)
+        )
+])
 
-test_dataset = datasets.SVHN(root='./data', split='test', download=True, transform=transform)
+train_dataset = datasets.SVHN(root='./data', split='train', download=True, transform=train_transform)
+extra = datasets.SVHN(root='./data', split='extra', download=True, transform=train_transform)
+train_dataset = torch.utils.data.ConcatDataset([train_dataset, extra])
+train_loader = DataLoader(train_dataset, batch_size=50, shuffle=True, num_workers=4, pin_memory=True)
+
+test_dataset = datasets.SVHN(root='./data', split='test', download=True, transform=test_transform)
 test_loader = DataLoader(test_dataset, batch_size=1000, shuffle=False, num_workers=4, pin_memory=True)
 # X_t, Y_t = next(iter(test_loader))
 # X_t = X_t.to(device)

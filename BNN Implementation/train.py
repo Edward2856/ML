@@ -1,6 +1,6 @@
 # from mnist import *
-from cifar import *
-# from svhn import *
+# from cifar import *
+from svhn import *
 # from setproctitle import setproctitle
 import os
 
@@ -29,14 +29,10 @@ for epoch in range(epochs):
         optimizer.step()
         clip_weights(layers)
 
-    # for layer in layers:
-    #     if layer['type'] == 'batchnorm':
-    #         print("Mean:", layer['running_mean'][:5].cpu())
-    #         print("Var :", layer['running_var'][:5].cpu())
-    #         break
     lr *= lr_decay
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
+
     train_correct = 0
     train_total = 0
     test_correct = 0
@@ -50,17 +46,19 @@ for epoch in range(epochs):
         #     train_total += labels.size(0)
         # accuracy_train = train_correct / train_total
 
-        # for images, labels in test_loader:
-        #     images, labels = images.to(device), labels.to(device)
-        #     labels = labels % 10  # Ensure labels are in the range [0, 9]
-        #     output = forward(images, layers, training=False)
-        #     pred = torch.argmax(output, dim=1)
-        #     test_correct += (pred == labels).sum().item()
-        #     test_total += labels.size(0)
-        # accuracy_test = test_correct / test_total if test_total > 0 else 0
-        output = forward(X_t, layers, training=False)
-        pred = torch.argmax(output, dim=1)
-        accuracy_test = (pred == Y_t).float().mean().item()
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            labels = labels % 10  # Ensure labels are in the range [0, 9]
+            output = forward(images, layers, training=False)
+            pred = torch.argmax(output, dim=1)
+            test_correct += (pred == labels).sum().item()
+            test_total += labels.size(0)
+        accuracy_test = test_correct / test_total if test_total > 0 else 0
+
+        # output = forward(X_t, layers, training=False)
+        # pred = torch.argmax(output, dim=1)
+        # accuracy_test = (pred == Y_t).float().mean().item()
+
         best_accuracy = max(best_accuracy, accuracy_test)
 
     print(
