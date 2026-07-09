@@ -1,6 +1,6 @@
-from mnist import *
+# from mnist import *
 # from cifar import *
-# from svhn import *
+from svhn import *
 # from setproctitle import setproctitle
 import os
 
@@ -44,18 +44,18 @@ for epoch in range(epochs):
         #     train_total += labels.size(0)
         # accuracy_train = train_correct / train_total
 
-        # for images, labels in test_loader:
-        #     images, labels = images.to(device), labels.to(device)
-        #     labels = labels % 10  # Ensure labels are in the range [0, 9]
-        #     output = forward(images, layers, training=False)
-        #     pred = torch.argmax(output, dim=1)
-        #     test_correct += (pred == labels).sum().item()
-        #     test_total += labels.size(0)
-        # accuracy_test = test_correct / test_total if test_total > 0 else 0
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            labels = labels % 10  # Ensure labels are in the range [0, 9]
+            output = forward(images, layers, training=False)
+            pred = torch.argmax(output, dim=1)
+            test_correct += (pred == labels).sum().item()
+            test_total += labels.size(0)
+        accuracy_test = test_correct / test_total if test_total > 0 else 0
 
-        output = forward(X_t, layers, training=False)
-        pred = torch.argmax(output, dim=1)
-        accuracy_test = (pred == Y_t).float().mean().item()
+        # output = forward(X_t, layers, training=False)
+        # pred = torch.argmax(output, dim=1)
+        # accuracy_test = (pred == Y_t).float().mean().item()
 
         best_accuracy = max(best_accuracy, accuracy_test)
         accuracy_history.append(accuracy_test)
@@ -66,4 +66,4 @@ for epoch in range(epochs):
     #     f'Training Accuracy: {accuracy_train * 100:.2f}'
     # )
 
-torch.save(accuracy_history, 'mnist_real_conv_accuracy.pt')
+# torch.save(accuracy_history, 'svhn_real_accuracy.pt')

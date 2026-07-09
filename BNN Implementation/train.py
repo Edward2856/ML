@@ -69,4 +69,4 @@ for epoch in range(epochs):
     #     f'Training Accuracy: {accuracy_train * 100:.2f}'
     # )
 
-torch.save(accuracy_history, 'mnist_conv_accuracy.pt')
+# torch.save(accuracy_history, 'mnist_accuracy.pt')
