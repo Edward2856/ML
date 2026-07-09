@@ -1,4 +1,5 @@
-from network import *
+# from network import *
+from network_real import *
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
@@ -34,44 +35,45 @@ lr_start = 1e-3
 lr_end = 1e-6
 epochs = 200
 lr_decay = (lr_end / lr_start) ** (1 / epochs)
+activation = F.relu
 
 layer_specs = [
     {'type': 'conv', 'in': 3, 'out': 64, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'conv', 'in': 64, 'out': 64, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'pool', 'kernel_size': 2, 'stride': 2, 'padding': 0},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'conv', 'in': 64, 'out': 128, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'conv', 'in': 128, 'out': 128, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'pool', 'kernel_size': 2, 'stride': 2, 'padding': 0},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'conv', 'in': 128, 'out': 256, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'conv', 'in': 256, 'out': 256, 'kernel_size': 3, 'stride': 1, 'padding': 1},
     {'type': 'pool', 'kernel_size': 2, 'stride': 2, 'padding': 0},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'flatten'},
     {'type': 'linear', 'in': 256 * 4 * 4, 'out': 1024},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'linear', 'in': 1024, 'out': 1024},
     {'type': 'batchnorm'},
-    {'type': 'activation', 'activation': binary_tanh},
+    {'type': 'activation', 'activation': activation},
 
     {'type': 'linear', 'in': 1024, 'out': 10},
-    {'type': 'batchnorm'},
+    # {'type': 'batchnorm'},
 ]

@@ -21,14 +21,11 @@ for epoch in range(epochs):
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
         labels = labels % 10  # Ensure labels are in the range [0, 9]
-        targets = F.one_hot(labels, num_classes=10).float()
-        targets = targets * 2 - 1
         optimizer.zero_grad()
         outputs = forward(images, layers, training=True)
-        loss = squared_hinge_loss(outputs, targets)
+        loss = criterion(outputs, labels) 
         loss.backward()
         optimizer.step()
-        clip_weights(layers)
 
     lr *= lr_decay
     for param_group in optimizer.param_groups:
@@ -69,4 +66,4 @@ for epoch in range(epochs):
     #     f'Training Accuracy: {accuracy_train * 100:.2f}'
     # )
 
-torch.save(accuracy_history, 'mnist_conv_accuracy.pt')
+torch.save(accuracy_history, 'mnist_real_conv_accuracy.pt')
