@@ -61,8 +61,6 @@ Dataset preprocessing and augmentation have been done as opposed to the original
 └── README.md
 ```
 
-*(The exact structure may vary depending on the current repository.)*
-
 ---
 
 ## Installation
