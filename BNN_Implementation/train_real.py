@@ -14,6 +14,7 @@ layers, parameters = build_layers(layer_specs)
 
 lr = lr_start
 optimizer = torch.optim.Adam(parameters, lr=lr)
+criterion = torch.nn.CrossEntropyLoss()
 best_accuracy = 0.0
 accuracy_history = []
 
