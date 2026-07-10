@@ -63,4 +63,4 @@ def forward(x, layers, training=True):
             raise ValueError(f"Unsupported layer type: {layer['type']}")
     return x
 
-criterion = nn.CrossEntropyLoss()
+# criterion = nn.CrossEntropyLoss()
