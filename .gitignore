@@ -3,3 +3,4 @@ Plots.py
 Test.py
 test_pytorch.py
 *.ipynb
+*.code-workspace
