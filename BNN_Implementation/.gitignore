@@ -1,2 +1,5 @@
 /data
 /__pycache__
+/results
+accuracy_plot.py
+test_Accuracies.py

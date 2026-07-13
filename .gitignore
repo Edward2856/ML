@@ -1,4 +1,5 @@
-train_images.pt
-train_labels.pt
-test_images.pt
-test_labels.pt
+*.png
+plots.py
+test.py
+test_pytorch.py
+*.ipynb
