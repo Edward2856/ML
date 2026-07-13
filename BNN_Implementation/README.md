@@ -57,7 +57,6 @@ Dataset preprocessing and augmentation have been done as opposed to the original
 ├── svhn.py                  # SVHN architecture
 ├── network_real.py          # Real-weighted model
 ├── train_real.py            # Training script for the real model
-├── results/                 # Accuracy plots and logs
 └── README.md
 ```
 
