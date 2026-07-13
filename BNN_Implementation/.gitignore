@@ -2,4 +2,4 @@
 /__pycache__
 /results
 accuracy_plot.py
-test_Accuracies.py
+test_accuracies.py
