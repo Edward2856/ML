@@ -1,5 +1,5 @@
 *.png
-plots.py
-test.py
+Plots.py
+Test.py
 test_pytorch.py
 *.ipynb
